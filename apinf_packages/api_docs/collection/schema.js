@@ -28,8 +28,7 @@ ApiDocs.schema = new SimpleSchema({
   },
   otherUrl: {
     type: String,
-    optional: true,
-    regEx: SimpleSchema.RegEx.Url,
+    optional: true
   },
   submit_methods: {
     type: [String],
