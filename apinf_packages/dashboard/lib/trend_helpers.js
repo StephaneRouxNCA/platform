@@ -26,6 +26,10 @@ export function arrowDirection (parameter, bucket) {
       comparison = bucket.compareUsers;
       break;
 
+    case 'pub_messages':
+      comparison = bucket.comparePubMessages;
+      break;
+
     default:
       comparison = 0;
 
@@ -60,6 +64,9 @@ export function percentageValue (parameter, bucket) {
       break;
     case 'users':
       comparison = bucket.compareUsers;
+      break;
+    case 'pub_messages':
+      comparison = bucket.comparePubMessages;
       break;
     default:
       comparison = 0;

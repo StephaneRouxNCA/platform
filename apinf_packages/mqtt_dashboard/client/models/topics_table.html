@@ -1,0 +1,37 @@
+<!-- Copyright 2017 Apinf Oy
+This file is covered by the EUPL license.
+You may obtain a copy of the licence at
+https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence-eupl-v11 -->
+
+<template name="topicsTable">
+  <table class="table table-bordered table-hover">
+    <thead>
+    <tr>
+      <th>Topic tree</th>
+      <th>Incoming bandwith</th>
+      <th>Outgoing bandwith</th>
+      <th>Published messages</th>
+      <th>Delivered messages</th>
+      <th>Published clients</th>
+      <th>Subscribed clients</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{# each topic in topicsList }}
+      <tr>
+        <td>
+          <a href="{{ pathFor 'topicPage' id=topic.id }}">
+            {{ topic.value }}
+          </a>
+        </td>
+        <td>{{ topic.incoming }}Mbps</td>
+        <td>{{ topic.outgoing }}Mbps</td>
+        <td>{{topic.publishedMessages }}</td>
+        <td>{{ topic.deliveredMessages }}</td>
+        <td>{{ topic.publishedClients }}</td>
+        <td>{{ topic.subscribedClients }}</td>
+      </tr>
+    {{/ each }}
+    </tbody>
+  </table>
+</template>

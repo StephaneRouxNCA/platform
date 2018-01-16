@@ -1,0 +1,31 @@
+<!-- Copyright 2017 Apinf Oy
+This file is covered by the EUPL license.
+You may obtain a copy of the licence at
+https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence-eupl-v11 -->
+
+<template name="mqttDashboardNavbar">
+  <nav class="navbar navbar-default navbar-fixed-top main-navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <img src="/img/hsl_logo.png" alt="">
+      </div>
+      <ul class="nav navbar-nav nanbar-left" id="main-navbar">
+        <li class="{{ isActiveRoute 'mqtt' }}">
+          <a href="{{ pathFor 'mqtt' }}" class="text-uppercase">
+            Mqtt Dashboard
+          </a>
+        </li>
+        <li class="{{ isActiveRoute 'topics' }}">
+          <a href="{{ pathFor 'topics' }}" class="text-uppercase">
+            Topics
+          </a>
+        </li>
+        <li class="{{ isActiveRoute 'acl' }}">
+          <a href="{{ pathFor 'acl' }}" class="text-uppercase">
+            Acl
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</template>

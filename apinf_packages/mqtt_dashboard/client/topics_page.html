@@ -2,9 +2,11 @@
 This file is covered by the EUPL license.
 You may obtain a copy of the licence at
 https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence-eupl-v11 -->
-
-<template name="chartPage">
-  <h1>
-    CHART DASHBOARD
-  </h1>
+<template name="topicsPage">
+  <div class="content-wrapper">
+    Topics Page
+    <div class="container">
+      {{> topicsTable topicsList=topicsList }}
+    </div>
+  </div>
 </template>
