@@ -14,10 +14,16 @@ import { Roles } from 'meteor/alanning:roles';
 // Collection imports
 import AclRules from '../';
 
-Meteor.publish('allAclRules', function () {
+Meteor.publish('allAclRules', () => {
   return AclRules.find();
 });
 
-Meteor.publish('favoriteTopics', function () {
+Meteor.publish('favoriteTopics', () => {
   return AclRules.find({ starred: true });
+});
+
+Meteor.publish('topicAclRules', (id) => {
+  check(id, String);
+
+  return AclRules.find({ _id: id });
 });

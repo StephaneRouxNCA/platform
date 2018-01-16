@@ -77,7 +77,7 @@ export function getPublishedClients (dateRange) {
 // aggregations.data_over_time.buckets -- Array
 // [0].pub_clients.buckets.length -- count of unique users
 
-export function getAllTopics (dateRange) {
+export function getTopicsData (filters, clientFilters, dateRange) {
   return {
     query: {
       bool: {
@@ -85,8 +85,8 @@ export function getAllTopics (dateRange) {
           {
             range: {
               timestamp: {
-                gte: dateRange.from,
-                lte: dateRange.to,
+                gte: 1515765600000,
+                // lte: dateRange.to,
               },
             },
           },
@@ -94,16 +94,42 @@ export function getAllTopics (dateRange) {
       },
     },
     aggs: {
-      all_topics: {
-        terms: {
-          field: 'topic.keyword',
+      group_by_topic: {
+        filters,
+        aggs: {
+          "message_published":{
+            "filter":{
+              "term":{
+                "event":"message_published"
+              }
+            },
+            "aggs": {
+              "client_publish":{
+                "cardinality":{
+                  "field":"from.client_id.keyword"
+                }
+              }
+            }
+          }
         },
+      },
+      clients: {
+        filters: clientFilters,
+        aggs: {
+          "client_subscribe":{
+            "filter":{
+              "term":{
+                "event":"client_subscribe"
+              }
+            }
+          }
+        }
       }
     },
   };
 }
 
-export function getDataByTopic (dateRange) {
+export function getDataByTopic (filters, dateRange) {
   return {
     query: {
       bool: {
@@ -124,6 +150,7 @@ export function getDataByTopic (dateRange) {
         ],
       },
     },
+
     "aggs": {
       "group_by_topics": {
         "filters": {

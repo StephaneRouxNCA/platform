@@ -5,23 +5,34 @@ https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence
 
 <template name="topicPage">
   <div class="container">
-    Topic page
-    <div class="row">
-      <label class="radio-inline">
-        <input type="radio" name="data-type" id="pub-messages" value="pub-messages" checked> Published Messages
-      </label>
-      <label class="radio-inline">
-        <input type="radio" name="data-type" id="del-messages" value="del-messages"> Delivered Messages
-      </label>
-      <label class="radio-inline">
-        <input type="radio" name="data-type" id="sub-clients" value="sub-clients"> Sub Clients
-      </label>
-
-      <div class="col-xs-6">
-        <strong>Published clients</strong>
-        {{> drawChart aggregatedData=aggregatedData query='published-clients' }}
-
+    {{# if Template.subscriptionsReady }}
+      <p>
+        {{ topicItem.topic }}
+      </p>
+      <div class="row form-group">
+        <div class="col-xs-12">
+          <label class="radio-inline">
+            <input type="radio" name="data-type" value="pub-messages" checked> Published Messages
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="data-type" value="del-messages"> Delivered Messages
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="data-type" value="sub-clients"> Subscribe Clients
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="data-type" value="sub-clients"> Published Clients
+          </label>
+        </div>
       </div>
-    </div>
+      <div class="row">
+        <div class="col-xs-6">
+          <strong>Published clients</strong>
+          {{> drawChart aggregatedData=aggregatedData query='published-clients' }}
+        </div>
+      </div>
+    {{ else }}
+      {{> spinner }}
+    {{/ if }}
   </div>
 </template>

@@ -8,7 +8,26 @@ import {Meteor} from "meteor/meteor";
 import {Template} from "meteor/templating";
 
 import moment from 'moment';
+import AclRules from '../collection';
 Template.topicPage.onCreated(function () {
+  let subscription;
+
+  this.autorun(() => {
+    const topicId = FlowRouter.getParam('id');
+
+    if (topicId) {
+      subscription = this.subscribe('topicAclRules', topicId);
+    }
+  });
+
+  this.autorun(() => {
+    const isReady = subscription.ready();
+
+    if (isReady) {
+      console.log(AclRules.findOne())
+    }
+  });
+
   this.dataType = new ReactiveVar('message_published');
 
   const instance = this;
@@ -39,34 +58,34 @@ Template.topicPage.onCreated(function () {
     this.lastUpdatedTime = this.queryOption.to;
 
     // fetch data for Published messages
-    const getPubMessages = getPublishedClients(this.queryOption);
+    // const getPubMessages = getPublishedClients(this.queryOption);
 
-    getPubMessages.query.bool.must.push({
-      term: {
-        "topic.keyword": topicValue
-      }
-    });
+    // getPubMessages.query.bool.must.push({
+    //   term: {
+    //     "topic.keyword": topicValue
+    //   }
+    // });
 
-    Meteor.call('sendElastisticsearchRequest', getPubMessages, (error, result) => {
-      if (error) {
-        sAlert.error(error.message);
-      } else {
-        const elasticsearchData = result.aggregations.data_over_time.buckets;
-
-        if (elasticsearchData.length === 0) {
-          // Set
-          elasticsearchData.push({
-            doc_count: 0,
-            key: this.queryOption.from,
-          });
-        }
-        instance.aggregatedData.set(elasticsearchData);
-
-        // Store info about pub clients
-        const publishedClientsData = publishedClients(elasticsearchData);
-        instance.publishedClientsData.set(publishedClientsData);
-      }
-    });
+    // Meteor.call('sendElastisticsearchRequest', getPubMessages, (error, result) => {
+    //   if (error) {
+    //     sAlert.error(error.message);
+    //   } else {
+    //     const elasticsearchData = result.aggregations.data_over_time.buckets;
+    //
+    //     if (elasticsearchData.length === 0) {
+    //       // Set
+    //       elasticsearchData.push({
+    //         doc_count: 0,
+    //         key: this.queryOption.from,
+    //       });
+    //     }
+    //     instance.aggregatedData.set(elasticsearchData);
+    //
+    //     // Store info about pub clients
+    //     const publishedClientsData = publishedClients(elasticsearchData);
+    //     instance.publishedClientsData.set(publishedClientsData);
+    //   }
+    // });
   };
   this.sendRequest();
 
@@ -87,6 +106,9 @@ Template.topicPage.onCreated(function () {
 Template.topicPage.helpers({
   aggregatedData () {
     return Template.instance().aggregatedData.get();
+  },
+  topicItem () {
+    return AclRules.findOne();
   },
 });
 
@@ -116,3 +138,7 @@ function publishedClients (elasticsearchData) {
     }
   });
 }
+
+Template.topicPage.onRendered(function () {
+
+});

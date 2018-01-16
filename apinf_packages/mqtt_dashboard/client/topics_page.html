@@ -3,10 +3,17 @@ This file is covered by the EUPL license.
 You may obtain a copy of the licence at
 https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence-eupl-v11 -->
 <template name="topicsPage">
-  <div class="content-wrapper">
-    Topics Page
     <div class="container">
-      {{> topicsTable topicsList=topicsList }}
+      <strong class="text-uppercase">
+        Wildcards
+      </strong>
+      <p>
+        Text explains what is that
+      </p>
+      {{# if Template.subscriptionsReady }}
+        {{> displayTopicsTable aclRules=aclRules }}
+      {{ else }}
+        {{> spinner }}
+      {{/ if }}
     </div>
-  </div>
 </template>

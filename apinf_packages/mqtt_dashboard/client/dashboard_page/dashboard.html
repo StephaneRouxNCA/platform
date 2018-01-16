@@ -5,6 +5,11 @@ https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence
 
 <template name="mqttDashboardPage">
   <div class="container">
+    <strong class="text-uppercase">
+      Mqtt real-time statistics
+    </strong>
+    <p>Automatically updates every 5 seconds</p>
+
     <div class="row form-group">
       <div class="col-xs-6">
         <strong>Incoming/Outgoing bandwith</strong>
@@ -40,7 +45,13 @@ https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence
     </div>
 
     <div class="row">
-      {{> topicsTable topicsList=favoriteTopicsList }}
+      <strong class="text-uppercase">
+        Starred wildcards
+      </strong>
+      <p>Text explains what is it</p>
+      {{# if Template.subscriptionsReady }}
+        {{> displayTopicsTable aclRules=aclRules }}
+      {{/ if }}
     </div>
   </div>
 </template>
