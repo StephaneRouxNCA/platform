@@ -7,10 +7,26 @@ import {ReactiveVar} from "meteor/reactive-var";
 import {Meteor} from "meteor/meteor";
 import {Template} from "meteor/templating";
 
+import { getHistogramData } from '../lib/es_requests';
 import moment from 'moment';
 import AclRules from '../collection';
+
 Template.topicPage.onCreated(function () {
   let subscription;
+
+  this.dataType = new ReactiveVar('message_published');
+  this.aggregatedData = new ReactiveVar();
+
+  this.queryOption = {
+    // 10/19/2017
+    from: 1508360400000,
+    // "10/04/2017"
+    doublePeriodAgo: 1507064400000,
+    // 10/19/2017
+    onePeriodAgo: 1508360400000,
+    // "11/03/2017"
+    to: 1509656400000,
+  };
 
   this.autorun(() => {
     const topicId = FlowRouter.getParam('id');
@@ -22,35 +38,100 @@ Template.topicPage.onCreated(function () {
 
   this.autorun(() => {
     const isReady = subscription.ready();
+    const eventType = this.dataType.get();
 
     if (isReady) {
-      console.log(AclRules.findOne())
+      const acl = AclRules.findOne();
+
+      const getPubMessages = getHistogramData(eventType, this.queryOption);
+
+      switch (eventType) {
+        case 'message_published': {
+          getPubMessages.query.bool.must.push({
+            term: {
+              'topic.keyword': acl.topic,
+            },
+          });
+          break;
+        }
+        case 'client_subscribe': {
+          const field = `topics.${acl.topic}.qos`;
+
+          getPubMessages.query.bool.must.push({
+            term: {
+              [field]: 0,
+            },
+          });
+          break;
+        }
+        case 'client_publish': {
+          getPubMessages.query.bool.must.pop();
+
+          getPubMessages.query.bool.must.push({
+            term: {
+              'topic.keyword': acl.topic,
+            },
+          });
+          getPubMessages.query.bool.must.push({
+            term: {
+              event: 'message_published',
+            },
+          });
+          getPubMessages.aggs.data_over_time.aggs = {
+            client_publish: {
+              cardinality: {
+                field: 'from.client_id.keyword',
+              },
+            },
+          };
+          break;
+        }
+        default:
+          break;
+
+      }
+      console.log(getPubMessages);
+
+      Meteor.call('sendElastisticsearchRequest', getPubMessages, (error, result) => {
+        if (error) {
+          sAlert.error(error.message);
+        } else {
+          const elasticsearchData = result.aggregations.data_over_time.buckets;
+
+          console.log('elasticsearchData', elasticsearchData)
+          if (elasticsearchData.length === 0) {
+            // Set
+            elasticsearchData.push({
+              doc_count: 0,
+              key: this.queryOption.from,
+            });
+          }
+
+          if (eventType === 'client_publish') {
+            const pubslihedClients = publishedClients(elasticsearchData);
+
+            this.aggregatedData.set(pubslihedClients);
+
+          } else {
+            this.aggregatedData.set(elasticsearchData);
+          }
+
+        }
+      });
     }
   });
 
-  this.dataType = new ReactiveVar('message_published');
+
+
 
   const instance = this;
 
-  instance.queryOption = {
-    // 10/19/2017
-    from: 1508360400000,
-    eventType: this.dataType.get(),
-    // "10/04/2017"
-    doublePeriodAgo: 1507064400000,
-    // 10/19/2017
-    onePeriodAgo: 1508360400000,
-    // "11/03/2017"
-    to: 1509656400000,
-  };
 
-  const topicValue = "/sm5/79";
 
-  instance.aggregatedData = new ReactiveVar();
+
   instance.publishedMessages = new ReactiveVar(0);
   instance.trend = new ReactiveVar({});
 
-  instance.eventType = new ReactiveVar('message_published');
 
   instance.lastUpdatedTime = 0;
 
@@ -60,11 +141,7 @@ Template.topicPage.onCreated(function () {
     // fetch data for Published messages
     // const getPubMessages = getPublishedClients(this.queryOption);
 
-    // getPubMessages.query.bool.must.push({
-    //   term: {
-    //     "topic.keyword": topicValue
-    //   }
-    // });
+
 
     // Meteor.call('sendElastisticsearchRequest', getPubMessages, (error, result) => {
     //   if (error) {
@@ -110,6 +187,9 @@ Template.topicPage.helpers({
   topicItem () {
     return AclRules.findOne();
   },
+  eventType () {
+    return Template.instance().eventType.get();
+  },
 });
 
 Template.topicPage.events({
@@ -126,7 +206,7 @@ function publishedClients (elasticsearchData) {
     return [{
       doc_count: 0,
       key: this.queryOption.from,
-    }]
+    }];
   }
 
   return elasticsearchData.map(dataset => {
@@ -134,8 +214,8 @@ function publishedClients (elasticsearchData) {
       // Get data
       key: dataset.key,
       // get count of unique users
-      doc_count: dataset.pub_clients.buckets.length
-    }
+      doc_count: dataset.client_publish.value
+    };
   });
 }
 

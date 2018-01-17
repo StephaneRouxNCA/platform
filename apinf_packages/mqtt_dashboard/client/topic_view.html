@@ -12,22 +12,21 @@ https://joinup.ec.europa.eu/community/eupl/og_page/european-union-public-licence
       <div class="row form-group">
         <div class="col-xs-12">
           <label class="radio-inline">
-            <input type="radio" name="data-type" value="pub-messages" checked> Published Messages
+            <input type="radio" name="data-type" value="message_published" checked> Published Messages
           </label>
           <label class="radio-inline">
             <input type="radio" name="data-type" value="del-messages"> Delivered Messages
           </label>
           <label class="radio-inline">
-            <input type="radio" name="data-type" value="sub-clients"> Subscribe Clients
+            <input type="radio" name="data-type" value="client_subscribe"> Subscribe Clients
           </label>
           <label class="radio-inline">
-            <input type="radio" name="data-type" value="sub-clients"> Published Clients
+            <input type="radio" name="data-type" value="client_publish"> Published Clients
           </label>
         </div>
       </div>
       <div class="row">
         <div class="col-xs-6">
-          <strong>Published clients</strong>
           {{> drawChart aggregatedData=aggregatedData query='published-clients' }}
         </div>
       </div>

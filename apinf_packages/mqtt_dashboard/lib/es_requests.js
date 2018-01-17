@@ -9,16 +9,16 @@ export function getHistogramData (eventType, dateRange) {
       bool: {
         must: [
           {
-            term: {
-              event: eventType,
+            range: {
+              timestamp: {
+                gte: 1515765600000,
+                // lte: dateRange.to,
+              },
             },
           },
           {
-            range: {
-              timestamp: {
-                gte: dateRange.from,
-                lte: dateRange.to,
-              },
+            term: {
+              event: eventType,
             },
           },
         ],
@@ -41,11 +41,6 @@ export function getPublishedClients (dateRange) {
       bool: {
         must: [
           {
-            term: {
-              event: 'message_published',
-            },
-          },
-          {
             range: {
               timestamp: {
                 gte: dateRange.from,
@@ -53,6 +48,12 @@ export function getPublishedClients (dateRange) {
               },
             },
           },
+          {
+            term: {
+              event: 'message_published',
+            },
+          },
+
         ],
       },
     },
