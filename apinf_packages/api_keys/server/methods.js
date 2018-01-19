@@ -140,10 +140,12 @@ Meteor.methods({
     }
   },
   getApisList (proxyId) {
+    // Make sure proxyId is a string
+    check(proxyId, String);
     // Get all APIs ID that are connected to specify Proxy
-    const apiIds = ProxyBackends.find({ proxyId: proxyId }).map(backend => backend.apiId);
+    const apiIds = ProxyBackends.find({ proxyId }).map(backend => { return backend.apiId });
     // Find all APIs that are connected to Proxy
-    const apisList = Apis.find({ _id: { $in: apiIds} }).fetch();
+    const apisList = Apis.find({ _id: { $in: apiIds } }).fetch();
 
     return apisList;
   },
