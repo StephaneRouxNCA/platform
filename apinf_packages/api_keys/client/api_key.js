@@ -1,6 +1,7 @@
 // Meteor packages imports
 import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
+import { ReactiveVar } from 'meteor/reactive-var';
 
 // Meteor contributed packages imports
 import { TAPi18n } from 'meteor/tap:i18n';
@@ -15,6 +16,24 @@ import ApiKeys from '/apinf_packages/api_keys/collection';
 Template.apiKey.onCreated(function () {
   // Subscribe to apiKeys for current user
   this.subscribe('apiKeysForCurrentUser');
+
+  // Get reference to template instance
+  const instance = this;
+  // Init the  apisList reactive variable
+  instance.apisList = new ReactiveVar();
+  // Get proxyBackend from template data
+  const proxyBackend = Template.currentData().proxyBackend;
+
+  // Get Apis list
+  Meteor.call('getApisList', proxyBackend.proxyId, (error, result) => {
+    if (error) {
+      // Show human-readable reason for error
+      sAlert.error(error.reason);
+    } else {
+      // Set result in reactive variable
+      instance.apisList.set(result);
+    }
+  });
 });
 
 Template.apiKey.onRendered(function () {
@@ -78,6 +97,10 @@ Template.apiKey.events({
     }
   },
   'click #regenerate-api-key': function () {
+    // Show confirmation modal
+    $('#regenerate-api-key-confirmation-modal').modal('show');
+  },
+  'click #regenerate-api-key-confirm': function () {
     // Get current template instance
     const instance = Template.instance();
 
@@ -114,6 +137,9 @@ Template.apiKey.events({
         }
       });
     }
+
+    // Dismiss the confirmation modal
+    $('#regenerate-api-key-confirmation-modal').modal('hide');
   },
 });
 
@@ -159,5 +185,9 @@ Template.apiKey.helpers({
 
     // Don't show "Get API Key" button if proxtBackend is undefined
     return false;
+  },
+  apisList () {
+    // Get and return apis list
+    return Template.instance().apisList.get();
   },
 });
